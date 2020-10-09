@@ -45,7 +45,7 @@
 | accessIds   | Integer[] | access IDs who have access to this session |
 | msgData     | String    | Message's content                          |
 
-### SessionIdStore
+### SessIdStore
 
 | Attribute   | Type     | Description                         |
 | ----------- | -------- | ----------------------------------- |

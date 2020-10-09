@@ -1,4 +1,4 @@
 codeforces-team-practice.code-workspace
 golang/.env
-golang/idgen/uid_keys.txt
+golang/idgen/keys.txt
 golang/idgen/generator.go

@@ -21,7 +21,7 @@ type UserIDStruct struct {
 // SessIDStruct Struct for new session ID
 type SessIDStruct struct {
 	SessID string `json:"sessid"`
-	Used   string `json:"used"`
+	Used   bool   `json:"used"`
 }
 
 // GetNewUID gets a new user ID
