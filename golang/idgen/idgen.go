@@ -4,6 +4,7 @@ package idgen
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,13 +21,14 @@ type UserIDStruct struct {
 // GetNewUID gets a new user ID
 func GetNewUID() string {
 
+	// Secret URI
+	uri := os.Getenv("CFTMPR_ATLAS_URI")
+
 	// Connecting to database
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(
-		"mongodb+srv://admin:kunalkushagraekanshi@cluster0.isccg.mongodb.net/cftmpr?retryWrites=true&w=majority",
-	))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatal(err)
 	}
