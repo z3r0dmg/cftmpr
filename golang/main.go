@@ -6,10 +6,18 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 
+	// Loading environment variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Initializing router
 	router := mux.NewRouter()
 
 	fmt.Println("Starting at port 8000...")
