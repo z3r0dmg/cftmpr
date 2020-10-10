@@ -10,19 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/Stumblef00l/cftmpr/structs"
 )
-
-// UserIDStruct Struct for new user ID
-type UserIDStruct struct {
-	UID  string `json:"uid"`
-	Used bool   `json:"used"`
-}
-
-// SessIDStruct Struct for new session ID
-type SessIDStruct struct {
-	SessID string `json:"sessid"`
-	Used   bool   `json:"used"`
-}
 
 // GetNewUID gets a new user ID
 func GetNewUID() string {
@@ -47,7 +37,7 @@ func GetNewUID() string {
 
 	// Get One new user ID
 	filter := bson.M{"used": false}
-	var newUser UserIDStruct
+	var newUser structs.UserIDStruct
 	err = userIDStore.FindOne(context.TODO(), filter).Decode(&newUser)
 
 	// Check for errors
@@ -82,7 +72,7 @@ func GetNewSessID() string {
 
 	// Get One new sessID
 	filter := bson.M{"used": false}
-	var newSess SessIDStruct
+	var newSess structs.SessIDStruct
 	err = sessIDStore.FindOne(context.TODO(), filter).Decode(&newSess)
 
 	// Check for errors
