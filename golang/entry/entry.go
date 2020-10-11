@@ -3,6 +3,7 @@ package entry
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 // RegisterUser registers a new user
@@ -48,6 +50,14 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	// Assign new UID to newUser
 	newUser.UID = idgen.GetNewUID()
 
+	// Hash the password
+	bytePass := []byte(newUser.Pass)
+	byteSalt := []byte("cftmpr")
+	newUser.Pass = hashPassword(bytePass, byteSalt)
+
+	// Assign time of joining of user
+	newUser.DateJoined = time.Now().UTC()
+
 	// Set response type
 	writer.Header().Set("Content-Type", "application/json")
 
@@ -61,11 +71,6 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	json.NewEncoder(writer).Encode(result)
-
-}
-
-// LoginUser verifies user credentials upon login request
-func LoginUser(writer http.ResponseWriter, request *http.Request) {
 
 }
 
@@ -86,4 +91,8 @@ func isRegistered(uname string, client *mongo.Client) bool {
 	}
 
 	return true
+}
+
+func hashPassword(password, salt []byte) string {
+	return string(pbkdf2.Key(password, salt, 4096, sha256.Size, sha256.New))
 }
