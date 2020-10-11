@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Stumblef00l/cftmpr/entry"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -20,6 +21,11 @@ func main() {
 	// Initializing router
 	router := mux.NewRouter()
 
+	// Add API routes here
+
+	router.HandleFunc("/api/register", entry.RegisterUser) // registers new user
+
+	// Start server
 	fmt.Println("Starting at port 8000...")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
