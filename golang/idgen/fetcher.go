@@ -72,8 +72,9 @@ func GetNewSessID() string {
 
 	// Get One new sessID
 	filter := bson.M{"used": false}
+	update := bson.M{"$set": bson.M{"used": true}}
 	var newSess structs.SessIDStruct
-	err = sessIDStore.FindOne(context.TODO(), filter).Decode(&newSess)
+	err = sessIDStore.FindOneAndUpdate(context.TODO(), filter, update).Decode(&newSess)
 
 	// Check for errors
 	if err != nil {
