@@ -60,9 +60,6 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	// Assign time of joining of user
 	newUser.DateJoined = time.Now().UTC()
 
-	// Set response type
-	writer.Header().Set("Content-Type", "application/json")
-
 	// Get the handle for user table
 	userTable := client.Database("cftmpr").Collection("Users")
 
