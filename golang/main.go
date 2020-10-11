@@ -23,7 +23,9 @@ func main() {
 
 	// Add API routes here
 
+	// User entry routes
 	router.HandleFunc("/api/register", entry.RegisterUser).Methods("POST") // registers new user
+	router.HandleFunc("/api/login", entry.LoginUser).Methods("POST")       // logins a user
 
 	// Start server
 	fmt.Println("Starting at port 8000...")

@@ -43,7 +43,7 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	_ = json.NewDecoder(request.Body).Decode(&newUser)
 
 	// Check if the user already exists in the database
-	if isRegistered(newUser.Uname, client) {
+	if isRegistered(newUser.Uname, client, &newUser) {
 
 		writer.WriteHeader(http.StatusFound)
 		return
@@ -77,15 +77,54 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 
 }
 
+// LoginUser implements user login
+func LoginUser(writer http.ResponseWriter, request *http.Request) {
+	// Secret URI
+	uri := os.Getenv("CFTMPR_ATLAS_URI")
+
+	// Connecting to database
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Disconnect after query
+	defer client.Disconnect(ctx)
+
+	// Get the user object from the request
+	var receivedUser structs.User
+	_ = json.NewDecoder(request.Body).Decode(&receivedUser)
+	var dbUser structs.User
+
+	// Check for username registration
+	if !isRegistered(receivedUser.Uname, client, &dbUser) {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Check for password match
+	bytePass := []byte(receivedUser.Pass)
+	byteSalt := []byte("cftmpr")
+	receivedUser.Pass = hashPassword(bytePass, byteSalt)
+	if receivedUser.Pass == dbUser.Pass {
+		writer.WriteHeader(http.StatusOK)
+	} else {
+		writer.WriteHeader(http.StatusUnauthorized)
+	}
+}
+
 // isRegistered Returns whether a user has been registered or not
-func isRegistered(uname string, client *mongo.Client) bool {
+func isRegistered(uname string, client *mongo.Client, checkUser *structs.User) bool {
 	// Get the handle for user table
 	userTable := client.Database("cftmpr").Collection("Users")
 
-	// Get One new user ID
+	// Check if username is present in database
+	var tempUser structs.User
 	filter := bson.M{"uname": uname}
-	var user structs.User
-	err := userTable.FindOne(context.TODO(), filter).Decode(&user)
+	err := userTable.FindOne(context.TODO(), filter).Decode(&tempUser)
 
 	// Return false if no results
 	if err == mongo.ErrNoDocuments {
@@ -94,6 +133,8 @@ func isRegistered(uname string, client *mongo.Client) bool {
 		log.Fatal(err)
 	}
 
+	// Store found value in checkUser
+	*checkUser = tempUser
 	return true
 }
 
