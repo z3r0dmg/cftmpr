@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Stumblef00l/cftmpr/idgen"
 	"github.com/Stumblef00l/cftmpr/structs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,15 +38,18 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	var newUser structs.User
 	_ = json.NewDecoder(request.Body).Decode(&newUser)
 
-	// Set response type
-	writer.Header().Set("Content-Type", "application/json")
-
 	// Check if the user already exists in the database
 	if isRegistered(newUser.Uname, client) {
 
 		writer.WriteHeader(http.StatusFound)
 		return
 	}
+
+	// Assign new UID to newUser
+	newUser.UID = idgen.GetNewUID()
+
+	// Set response type
+	writer.Header().Set("Content-Type", "application/json")
 
 	// Get the handle for user table
 	userTable := client.Database("cftmpr").Collection("Users")
