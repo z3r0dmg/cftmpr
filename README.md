@@ -40,4 +40,4 @@ Find all the documentation in the docs directory.
 
 ## Status
 
-The project is in its nascent stage. idgen package has been completed. user-auth package will be up next.
+The project is in its nascent stage. Login routes have been implemented. Messaging routes up next.
