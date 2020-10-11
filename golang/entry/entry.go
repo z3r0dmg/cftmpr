@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,6 +21,7 @@ import (
 
 // RegisterUser registers a new user
 func RegisterUser(writer http.ResponseWriter, request *http.Request) {
+
 	// Secret URI
 	uri := os.Getenv("CFTMPR_ATLAS_URI")
 
@@ -64,13 +66,17 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	// Get the handle for user table
 	userTable := client.Database("cftmpr").Collection("Users")
 
+	fmt.Println(newUser)
+
 	// Insert the newUser to the userTable
-	result, err := userTable.InsertOne(context.TODO(), newUser)
+	_, err = userTable.InsertOne(context.TODO(), newUser)
 	if err != nil {
+		writer.WriteHeader(http.StatusBadGateway)
 		log.Fatal(err)
 	}
 
-	json.NewEncoder(writer).Encode(result)
+	// Send confirmation of creation
+	writer.WriteHeader(http.StatusOK)
 
 }
 
@@ -84,6 +90,7 @@ func isRegistered(uname string, client *mongo.Client) bool {
 	var user structs.User
 	err := userTable.FindOne(context.TODO(), filter).Decode(&user)
 
+	// Return false if no results
 	if err == mongo.ErrNoDocuments {
 		return false
 	} else if err != nil {
@@ -93,6 +100,7 @@ func isRegistered(uname string, client *mongo.Client) bool {
 	return true
 }
 
+// hashPassword Returns pbkdf2 hashed password
 func hashPassword(password, salt []byte) string {
 	return string(pbkdf2.Key(password, salt, 4096, sha256.Size, sha256.New))
 }
