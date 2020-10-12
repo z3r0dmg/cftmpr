@@ -36,9 +36,11 @@ func GetNewUID() string {
 	userIDStore := client.Database("cftmpr").Collection("UserIdStore")
 
 	// Get One new user ID
+
 	filter := bson.M{"used": false}
+	update := bson.M{"$set": bson.M{"used": true}}
 	var newUser structs.UserIDStruct
-	err = userIDStore.FindOne(context.TODO(), filter).Decode(&newUser)
+	err = userIDStore.FindOneAndUpdate(context.TODO(), filter, update).Decode(&newUser)
 
 	// Check for errors
 	if err != nil {
