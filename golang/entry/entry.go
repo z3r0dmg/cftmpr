@@ -8,34 +8,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/Stumblef00l/cftmpr/idgen"
 	"github.com/Stumblef00l/cftmpr/structs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/pbkdf2"
 )
 
 // RegisterUser registers a new user
-func RegisterUser(writer http.ResponseWriter, request *http.Request) {
-
-	// Secret URI
-	uri := os.Getenv("CFTMPR_ATLAS_URI")
-
-	// Connecting to database
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Disconnect after query
-	defer client.Disconnect(ctx)
+func RegisterUser(writer http.ResponseWriter, request *http.Request, client *mongo.Client) {
 
 	// Get the user object from the Request
 
@@ -66,7 +49,7 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println(newUser)
 
 	// Insert the newUser to the userTable
-	_, err = userTable.InsertOne(context.TODO(), newUser)
+	_, err := userTable.InsertOne(context.TODO(), newUser)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadGateway)
 		log.Fatal(err)
@@ -78,21 +61,7 @@ func RegisterUser(writer http.ResponseWriter, request *http.Request) {
 }
 
 // LoginUser implements user login
-func LoginUser(writer http.ResponseWriter, request *http.Request) {
-	// Secret URI
-	uri := os.Getenv("CFTMPR_ATLAS_URI")
-
-	// Connecting to database
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Disconnect after query
-	defer client.Disconnect(ctx)
+func LoginUser(writer http.ResponseWriter, request *http.Request, client *mongo.Client) {
 
 	// Get the user object from the request
 	var receivedUser structs.User
